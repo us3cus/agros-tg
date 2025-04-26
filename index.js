@@ -1,25 +1,16 @@
-// index.js
 const { Telegraf, session } = require('telegraf');
-const { Pool } = require('pg');
-require('dotenv').config();
 
+// Подключаем middleware для сессий
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
-// Подключение к PostgreSQL
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
-
-// Сессии для хранения данных пользователя
-bot.use(session());
+bot.use(session()); // эта строка нужна для использования ctx.session
 
 bot.start((ctx) => {
   ctx.reply('Привет! Напиши /newform чтобы создать новую форму.');
 });
 
 bot.command('newform', (ctx) => {
-  ctx.session.form = {};
-  ctx.session.step = 'farm_name';
+  ctx.session.form = {};  // Инициализация сессии
+  ctx.session.step = 'farm_name';  // Начинаем с первого шага
   ctx.reply('Введите имя хозяйства:');
 });
 
@@ -68,6 +59,7 @@ bot.on('text', async (ctx) => {
   }
 });
 
+// Сохраняем данные формы в БД
 async function saveForm(ctx) {
   const form = ctx.session.form;
   const client = await pool.connect();
@@ -94,7 +86,6 @@ async function saveForm(ctx) {
        VALUES ($1, NOW() + INTERVAL '$2 minutes', 'pending')`,
       [formId, form.call_after_minutes]
     );
-
   } catch (error) {
     console.error('Ошибка при сохранении формы:', error);
   } finally {
@@ -103,9 +94,3 @@ async function saveForm(ctx) {
 }
 
 bot.launch();
-
-// Завершаем бот корректно
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
-
-console.log('Бот запущен!');

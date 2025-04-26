@@ -49,14 +49,39 @@ const handleViewForm = async (ctx) => {
       `Дата звонка: ${form.call_date}\n` +
       `Время звонка: ${form.call_time}`;
     
-    ctx.reply(message, backKeyboard);
+    // Создаем клавиатуру с кнопками для действий с формой
+    const keyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('❌ Удалить форму', `delete_form_${form._id}`)],
+      [Markup.button.callback('🔙 Вернуться к списку форм', 'view_forms')]
+    ]);
+    
+    ctx.reply(message, keyboard);
   } catch (error) {
     console.error('Error viewing form:', error);
     ctx.reply('Произошла ошибка при просмотре формы.', mainKeyboard);
   }
 };
 
+// Обработчик удаления формы
+const handleDeleteForm = async (ctx) => {
+  try {
+    const formId = ctx.match[1];
+    const form = await Form.findByIdAndDelete(formId);
+    
+    if (!form) {
+      ctx.reply('Форма не найдена.', mainKeyboard);
+      return;
+    }
+    
+    ctx.reply('Форма успешно удалена!', mainKeyboard);
+  } catch (error) {
+    console.error('Error deleting form:', error);
+    ctx.reply('Произошла ошибка при удалении формы.', mainKeyboard);
+  }
+};
+
 module.exports = {
   handleViewForms,
-  handleViewForm
+  handleViewForm,
+  handleDeleteForm
 }; 

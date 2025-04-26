@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 // Импортируем обработчики
 const { handleStart, handleBack, mainKeyboard } = require('./handlers/mainMenu');
 const { handleCreateForm, handleNewFormCommand, handleFormText } = require('./handlers/formFilling');
-const { handleViewForms, handleViewForm } = require('./handlers/formViewing');
+const { handleViewForms, handleViewForm, handleDeleteForm } = require('./handlers/formViewing');
 
 // Подключаемся к MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI, {
@@ -28,6 +28,7 @@ bot.start(handleStart);
 bot.action('create_form', handleCreateForm);
 bot.action('view_forms', handleViewForms);
 bot.action(/^view_form_(.+)$/, handleViewForm);
+bot.action(/^delete_form_(.+)$/, handleDeleteForm);
 bot.action('back_to_main', handleBack);
 bot.command('newform', handleNewFormCommand);
 bot.on('text', handleFormText);

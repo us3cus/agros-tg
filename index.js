@@ -1,8 +1,10 @@
 const { Telegraf, session } = require('telegraf');
 require('dotenv').config();
+const { Pool } = require('pg');
+const pool = new Pool();
 // Подключаем middleware для сессий
 const bot = new Telegraf(process.env.BOT_TOKEN);
-bot.use(session()); // эта строка нужна для использования ctx.session
+bot.use(session({ defaultSession: () => ({}) })); // эта строка нужна для использования ctx.session и инициализации пустой сессии
 
 bot.start((ctx) => {
   ctx.reply('Привет! Напиши /newform чтобы создать новую форму.');

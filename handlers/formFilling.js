@@ -1,6 +1,6 @@
 const Form = require('../models/Form');
 const CallTask = require('../models/CallTask');
-const { backKeyboard } = require('./mainMenu');
+const { backKeyboard, mainKeyboard } = require('./mainMenu');
 
 // Обработчик кнопки "Создать форму"
 const handleCreateForm = (ctx) => {

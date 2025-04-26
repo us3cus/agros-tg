@@ -2,6 +2,38 @@ require('dotenv').config();
 const { Telegraf, session } = require('telegraf');
 const mongoose = require('mongoose');
 
+// Список разрешенных пользователей
+const allowedUserIds = [
+  6297348443,
+  383906528,
+  985599049,
+  585898839
+];
+
+// Функция проверки доступа пользователя
+const isUserAllowed = (ctx) => {
+  return allowedUserIds.includes(ctx.from.id);
+};
+
+// Middleware для проверки доступа
+const checkAccess = async (ctx, next) => {
+  if (!isUserAllowed(ctx)) {
+    try {
+      await ctx.reply('⛔ Доступ ограничен. У вас нет прав для использования этого бота.');
+    } catch (error) {
+      if (error.response && error.response.error_code === 403) {
+        // Пользователь заблокировал бота, игнорируем ошибку
+        console.log(`User ${ctx.from.id} has blocked the bot`);
+      } else {
+        // Другие ошибки логируем
+        console.error('Error sending access denied message:', error);
+      }
+    }
+    return;
+  }
+  return next();
+};
+
 // Импортируем обработчики
 const { handleStart, handleBack, mainKeyboard } = require('./handlers/mainMenu');
 const { handleCreateForm, handleNewFormCommand, handleFormText } = require('./handlers/formFilling');
@@ -22,6 +54,9 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(session({
   defaultSession: () => ({})
 }));
+
+// Применяем middleware проверки доступа
+bot.use(checkAccess);
 
 // Регистрируем обработчики
 bot.start(handleStart);

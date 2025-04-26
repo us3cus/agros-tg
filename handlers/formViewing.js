@@ -1,4 +1,6 @@
 const Form = require('../models/Form');
+const CallTask = require('../models/CallTask');
+const DeletionLog = require('../models/DeletionLog');
 const { mainKeyboard, backKeyboard } = require('./mainMenu');
 const { Markup } = require('telegraf');
 
@@ -66,14 +68,42 @@ const handleViewForm = async (ctx) => {
 const handleDeleteForm = async (ctx) => {
   try {
     const formId = ctx.match[1];
-    const form = await Form.findByIdAndDelete(formId);
+    const form = await Form.findById(formId);
     
     if (!form) {
       ctx.reply('Форма не найдена.', mainKeyboard);
       return;
     }
+
+    // Создаем запись в логе удаления перед удалением формы
+    const deletionLog = new DeletionLog({
+      form_id: form._id,
+      deleted_by: {
+        user_id: ctx.from.id,
+        first_name: ctx.from.first_name
+      },
+      form_data: {
+        farm_name: form.farm_name,
+        treatment_date: form.treatment_date,
+        chemical_name: form.chemical_name,
+        field_size: form.field_size,
+        ph_before: form.ph_before,
+        ph_after: form.ph_after,
+        call_date: form.call_date,
+        call_time: form.call_time
+      }
+    });
+
+    // Удаляем связанную задачу звонка
+    await CallTask.deleteMany({ form_id: form._id });
     
-    ctx.reply('Форма успешно удалена!', mainKeyboard);
+    // Удаляем форму
+    await Form.findByIdAndDelete(formId);
+    
+    // Сохраняем лог удаления
+    await deletionLog.save();
+    
+    ctx.reply('Форма и связанные с ней данные успешно удалены!', mainKeyboard);
   } catch (error) {
     console.error('Error deleting form:', error);
     ctx.reply('Произошла ошибка при удалении формы.', mainKeyboard);

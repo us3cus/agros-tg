@@ -1,7 +1,13 @@
 const { Telegraf, session } = require('telegraf');
 require('dotenv').config();
 const { Pool } = require('pg');
-const pool = new Pool();
+const pool = new Pool({
+  user: process.env.DB_USER || 'botuser',
+  password: process.env.DB_PASSWORD || 'botpassword',
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'botdb'
+});
 // Подключаем middleware для сессий
 const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(session({ defaultSession: () => ({}) })); // эта строка нужна для использования ctx.session и инициализации пустой сессии

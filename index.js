@@ -1,5 +1,5 @@
 const { Telegraf, session } = require('telegraf');
-
+require('dotenv').config();
 // Подключаем middleware для сессий
 const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(session()); // эта строка нужна для использования ctx.session

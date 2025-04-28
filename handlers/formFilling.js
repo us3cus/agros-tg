@@ -1,6 +1,6 @@
 const Form = require('../models/Form');
 const CallTask = require('../models/CallTask');
-const { backKeyboard } = require('./mainMenu');
+const { backKeyboard, mainKeyboard } = require('./mainMenu');
 
 // Обработчик кнопки "Создать форму"
 const handleCreateForm = (ctx) => {
@@ -20,13 +20,15 @@ const handleNewFormCommand = (ctx) => {
 async function saveForm(ctx) {
   const form = new Form({
     farm_name: ctx.session.form.farm_name,
+    phone_number: ctx.session.form.phone_number,
     treatment_date: ctx.session.form.treatment_date,
     chemical_name: ctx.session.form.chemical_name,
     field_size: ctx.session.form.field_size,
     ph_before: ctx.session.form.ph_before,
     ph_after: ctx.session.form.ph_after,
     call_date: ctx.session.form.call_date,
-    call_time: ctx.session.form.call_time
+    call_time: ctx.session.form.call_time,
+    author_id: ctx.from.id // Добавляем ID автора из контекста сообщения
   });
 
   try {
@@ -57,6 +59,15 @@ const handleFormText = async (ctx) => {
   switch (ctx.session.step) {
     case 'farm_name':
       ctx.session.form.farm_name = text;
+      ctx.session.step = 'phone_number';
+      ctx.reply('Введите номер телефона (например: +77001234567):', backKeyboard);
+      break;
+    case 'phone_number':
+      if (!/^\+?\d{10,15}$/.test(text)) {
+        ctx.reply('Неверный формат номера телефона. Пожалуйста, введите номер в формате +77001234567:', backKeyboard);
+        return;
+      }
+      ctx.session.form.phone_number = text;
       ctx.session.step = 'treatment_date';
       ctx.reply('Введите дату обработки в формате ГГГГ-ММ-ДД (например, 2024-03-20):', backKeyboard);
       break;

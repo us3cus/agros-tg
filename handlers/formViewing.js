@@ -40,27 +40,68 @@ const handleViewForm = async (ctx) => {
       ctx.reply('Форма не найдена.', mainKeyboard);
       return;
     }
+
+    // Получаем задачу звонка
+    const callTask = await CallTask.findOne({ form_id: formId });
+    const taskStatus = callTask ? callTask.status : 'не найдена';
     
     const message = `Детали формы:\n\n` +
       `Хозяйство: ${form.farm_name}\n` +
+      `Номер телефона: ${form.phone_number}\n` +
       `Дата обработки: ${form.treatment_date}\n` +
       `Препарат: ${form.chemical_name}\n` +
       `Размер поля: ${form.field_size} га\n` +
       `pH до: ${form.ph_before}\n` +
       `pH после: ${form.ph_after}\n` +
       `Дата звонка: ${form.call_date}\n` +
-      `Время звонка: ${form.call_time}`;
+      `Время звонка: ${form.call_time}\n` +
+      `Статус задачи: ${taskStatus}`;
     
     // Создаем клавиатуру с кнопками для действий с формой
-    const keyboard = Markup.inlineKeyboard([
+    const keyboardButtons = [];
+    
+    if (callTask && callTask.status === 'pending') {
+      keyboardButtons.push([Markup.button.callback('✅ Отметить как выполненную', `complete_task_${form._id}`)]);
+    }
+    
+    keyboardButtons.push(
       [Markup.button.callback('❌ Удалить форму', `delete_form_${form._id}`)],
       [Markup.button.callback('🔙 Вернуться к списку форм', 'view_forms')]
-    ]);
+    );
+    
+    const keyboard = Markup.inlineKeyboard(keyboardButtons);
     
     ctx.reply(message, keyboard);
   } catch (error) {
     console.error('Error viewing form:', error);
     ctx.reply('Произошла ошибка при просмотре формы.', mainKeyboard);
+  }
+};
+
+// Обработчик отметки задачи как выполненной
+const handleCompleteTask = async (ctx) => {
+  try {
+    const formId = ctx.match[1];
+    const callTask = await CallTask.findOne({ form_id: formId });
+    
+    if (!callTask) {
+      ctx.reply('Задача не найдена.', mainKeyboard);
+      return;
+    }
+    
+    if (callTask.status === 'done') {
+      ctx.reply('Задача уже отмечена как выполненная.', mainKeyboard);
+      return;
+    }
+    
+    // Обновляем статус задачи
+    callTask.status = 'done';
+    await callTask.save();
+    
+    ctx.reply('✅ Задача успешно отмечена как выполненная!', mainKeyboard);
+  } catch (error) {
+    console.error('Error completing task:', error);
+    ctx.reply('Произошла ошибка при отметке задачи.', mainKeyboard);
   }
 };
 
@@ -113,5 +154,6 @@ const handleDeleteForm = async (ctx) => {
 module.exports = {
   handleViewForms,
   handleViewForm,
-  handleDeleteForm
+  handleDeleteForm,
+  handleCompleteTask
 }; 

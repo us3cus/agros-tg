@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { Telegraf, session } = require('telegraf');
 const mongoose = require('mongoose');
+const { processTasks } = require('./handlers/taskProcessor');
 
 // Список разрешенных пользователей
 const allowedUserIds = [
@@ -37,7 +38,7 @@ const checkAccess = async (ctx, next) => {
 // Импортируем обработчики
 const { handleStart, handleBack, mainKeyboard } = require('./handlers/mainMenu');
 const { handleCreateForm, handleNewFormCommand, handleFormText } = require('./handlers/formFilling');
-const { handleViewForms, handleViewForm, handleDeleteForm } = require('./handlers/formViewing');
+const { handleViewForms, handleViewForm, handleDeleteForm, handleCompleteTask } = require('./handlers/formViewing');
 
 // Подключаемся к MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI, {
@@ -64,12 +65,16 @@ bot.action('create_form', handleCreateForm);
 bot.action('view_forms', handleViewForms);
 bot.action(/^view_form_(.+)$/, handleViewForm);
 bot.action(/^delete_form_(.+)$/, handleDeleteForm);
+bot.action(/^complete_task_(.+)$/, handleCompleteTask);
 bot.action('back_to_main', handleBack);
 bot.command('newform', handleNewFormCommand);
 bot.on('text', handleFormText);
 
 // Запускаем бота
 bot.launch();
+
+// Запускаем обработчик задач
+processTasks();
 
 // Завершаем работу бота при остановке
 process.once('SIGINT', () => bot.stop('SIGINT'));

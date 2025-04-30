@@ -51,8 +51,6 @@ const handleViewForm = async (ctx) => {
       `Дата обработки: ${form.treatment_date}\n` +
       `Препарат: ${form.chemical_name}\n` +
       `Размер поля: ${form.field_size} га\n` +
-      `pH до: ${form.ph_before}\n` +
-      `pH после: ${form.ph_after}\n` +
       `Дата звонка: ${form.call_date}\n` +
       `Время звонка: ${form.call_time}\n` +
       `Статус задачи: ${taskStatus}`;
@@ -71,7 +69,17 @@ const handleViewForm = async (ctx) => {
     
     const keyboard = Markup.inlineKeyboard(keyboardButtons);
     
-    ctx.reply(message, keyboard);
+    // Отправляем текстовое сообщение с деталями формы
+    await ctx.reply(message, keyboard);
+    
+    // Отправляем фотографии pH, если они есть
+    if (form.ph_before_photo) {
+      await ctx.replyWithPhoto(form.ph_before_photo, { caption: 'pH воды ДО добавления препарата' });
+    }
+    
+    if (form.ph_after_photo) {
+      await ctx.replyWithPhoto(form.ph_after_photo, { caption: 'pH воды ПОСЛЕ добавления препарата' });
+    }
   } catch (error) {
     console.error('Error viewing form:', error);
     ctx.reply('Произошла ошибка при просмотре формы.', mainKeyboard);
@@ -107,6 +115,35 @@ const handleCompleteTask = async (ctx) => {
 
 // Обработчик удаления формы
 const handleDeleteForm = async (ctx) => {
+  try {
+    const formId = ctx.match[1];
+    const form = await Form.findById(formId);
+    
+    if (!form) {
+      ctx.reply('Форма не найдена.', mainKeyboard);
+      return;
+    }
+
+    // Определяем сообщение подтверждения в зависимости от ID пользователя
+    const confirmationMessage = ctx.from.id === 985599049 
+      ? 'Миша, ты не тупишь?' 
+      : 'Вы уверены?';
+
+    // Создаем клавиатуру с кнопками подтверждения
+    const confirmationKeyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('✅ Да', `confirm_delete_${formId}`)],
+      [Markup.button.callback('❌ Нет', 'view_forms')]
+    ]);
+
+    await ctx.reply(confirmationMessage, confirmationKeyboard);
+  } catch (error) {
+    console.error('Error in delete confirmation:', error);
+    ctx.reply('Произошла ошибка при подтверждении удаления.', mainKeyboard);
+  }
+};
+
+// Обработчик подтверждения удаления формы
+const handleConfirmDelete = async (ctx) => {
   try {
     const formId = ctx.match[1];
     const form = await Form.findById(formId);
@@ -155,5 +192,6 @@ module.exports = {
   handleViewForms,
   handleViewForm,
   handleDeleteForm,
+  handleConfirmDelete,
   handleCompleteTask
 }; 

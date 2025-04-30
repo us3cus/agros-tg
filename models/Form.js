@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 
 const formSchema = new mongoose.Schema({
-  farm_name: { type: String, required: true },
-  phone_number: { type: String, required: true },
-  treatment_date: { type: String, required: true },
-  chemical_name: { type: String, required: true },
-  field_size: { type: Number, required: true },
-  ph_before: { type: Number, required: true },
-  ph_after: { type: Number, required: true },
-  call_date: { type: String, required: true },
-  call_time: { type: String, required: true },
-  author_id: { type: Number, required: true },
+  farm_name: String,
+  phone_number: String,
+  treatment_date: String,
+  chemical_name: String,
+  field_size: Number,
+  ph_before_photo: { type: String, default: null }, // file_id из Telegram
+  ph_after_photo: { type: String, default: null }, // file_id из Telegram
+  call_date: String,
+  call_time: String,
+  author_id: Number,
   created_at: { type: Date, default: Date.now }
 });
 

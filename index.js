@@ -39,6 +39,7 @@ const checkAccess = async (ctx, next) => {
 const { handleStart, handleBack, mainKeyboard } = require('./handlers/mainMenu');
 const { handleCreateForm, handleNewFormCommand, handleFormText, handlePhotoUpload, handleSetDate3Days } = require('./handlers/formFilling');
 const { handleViewForms, handleViewForm, handleDeleteForm, handleCompleteTask, handleConfirmDelete } = require('./handlers/formViewing');
+const { handleWeather, handleLocation } = require('./handlers/weatherHandler');
 
 // Подключаемся к MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI, {
@@ -69,6 +70,8 @@ bot.action(/^confirm_delete_(.+)$/, handleConfirmDelete);
 bot.action('set_date_3_days', handleSetDate3Days);
 bot.action(/^complete_task_(.+)$/, handleCompleteTask);
 bot.action('back_to_main', handleBack);
+bot.action('weather', handleWeather);
+bot.on('location', handleLocation);
 bot.command('newform', handleNewFormCommand);
 bot.on('text', handleFormText);
 bot.on('photo', handlePhotoUpload);

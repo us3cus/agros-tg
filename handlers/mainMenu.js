@@ -3,7 +3,8 @@ const { Markup } = require('telegraf');
 // Создаем клавиатуру для главного меню
 const mainKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback('📋 Создать форму', 'create_form')],
-  [Markup.button.callback('📊 Просмотреть формы', 'view_forms')]
+  [Markup.button.callback('📊 Просмотреть формы', 'view_forms')],
+  [Markup.button.callback('🌤️ Погода', 'weather')]
 ]);
 
 // Создаем клавиатуру для возврата

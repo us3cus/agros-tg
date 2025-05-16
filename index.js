@@ -40,7 +40,7 @@ const { handleStart, handleBack, mainKeyboard } = require('./handlers/mainMenu')
 const { handleCreateForm, handleNewFormCommand, handleFormText, handlePhotoUpload, handleSetDate3Days } = require('./handlers/formFilling');
 const { handleViewForms, handleViewForm, handleDeleteForm, handleCompleteTask, handleConfirmDelete } = require('./handlers/formViewing');
 const { handleWeather, handleLocation } = require('./handlers/weatherHandler');
-const { handleNewOrderCommand, handleOrderText } = require('./handlers/orderHandler');
+const { handleNewOrderCommand, handleOrderText, handleAutoFill } = require('./handlers/orderHandler');
 const { handleViewOrders, handleViewOrder, handleDeleteOrder, handleConfirmDeleteOrder } = require('./handlers/orderViewing');
 
 // Подключаемся к MongoDB Atlas
@@ -84,9 +84,14 @@ bot.action(/^delete_order_(.+)$/, handleDeleteOrder);
 bot.action(/^confirm_delete_(.+)$/, handleConfirmDelete);
 bot.action(/^confirm_delete_order_(.+)$/, handleConfirmDeleteOrder);
 bot.action('set_date_3_days', handleSetDate3Days);
-bot.action(/^complete_task_(.+)$/, handleCompleteTask);
+bot.action('complete_task', handleCompleteTask);
 bot.action('back_to_main', handleBack);
 bot.action('weather', handleWeather);
+bot.action('auto_fill', handleAutoFill);
+bot.action('manual_fill', (ctx) => {
+  ctx.session.step = 'order_company_name';
+  ctx.reply('Введите название компании:', backKeyboard);
+});
 bot.on('location', handleLocation);
 bot.command('newform', handleNewFormCommand);
 bot.command('neworder', handleNewOrderCommand);

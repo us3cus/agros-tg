@@ -5,8 +5,16 @@ const orderSchema = new mongoose.Schema({
   order_id: { type: String, default: () => uuidv4(), unique: true },
   company_name: String,
   contacts: String,
-  drones: [String],
-  date: String,
+  equipment: {
+    name: String,
+    price: Number,
+    nds: Number
+  },
+  seller_info: {
+    name: String,
+    director: String,
+    data: String
+  },
   created_at: { type: Date, default: Date.now },
   author_id: Number,
   status: { type: String, default: 'pending' }

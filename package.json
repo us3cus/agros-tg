@@ -1,7 +1,7 @@
 {
     "name": "telegram-field-bot",
     "version": "1.0.0",
-    "description": "Telegram-бот для учёта удобрения полей и задач на звонок",
+    "description": "Telegram-бот для учёта удобрения полей и менеджмента продаж",
     "main": "index.js",
     "scripts": {
         "start": "node index.js"
@@ -12,6 +12,7 @@
         "axios": "^1.9.0",
         "dotenv": "^16.5.0",
         "mongoose": "^8.14.0",
-        "telegraf": "^4.12.2"
+        "telegraf": "^4.12.2",
+        "uuid": "^9.0.1"
     }
 }

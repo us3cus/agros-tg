@@ -4,6 +4,7 @@ const { Markup } = require('telegraf');
 const mainKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback('📋 Создать форму', 'create_form')],
   [Markup.button.callback('📊 Просмотреть формы', 'view_forms')],
+  [Markup.button.callback('🚁 Просмотреть заказы', 'view_orders')],
   [Markup.button.callback('🌤️ Погода', 'weather')]
 ]);
 

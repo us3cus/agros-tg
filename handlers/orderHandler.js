@@ -34,7 +34,9 @@ const generateDocx = async (orderData) => {
       seller_data: sellerData.seller.seller_data,
       seller_phone: sellerData.seller.phone_number,
       seller_address: sellerData.seller.address,
-      date: new Date().toLocaleDateString('ru-RU')
+      date: new Date().toLocaleDateString('ru-RU'),
+      agreement_date: orderData.agreement_date || new Date().toLocaleDateString('ru-RU'),
+      contact_number: orderData.contact_number || `№${orderData.order_id.slice(0, 8)}`
     };
 
     // Заполняем шаблон
@@ -85,7 +87,9 @@ const handleAutoFill = async (ctx) => {
       name: sellerData.seller.seller_name,
       director: sellerData.seller.director_name,
       data: sellerData.seller.seller_data
-    }
+    },
+    agreement_date: new Date().toLocaleDateString('ru-RU'),
+    contact_number: `№${Date.now().toString().slice(-8)}`
   };
   
   try {
@@ -94,6 +98,8 @@ const handleAutoFill = async (ctx) => {
       contacts: ctx.session.order.contacts,
       equipment: ctx.session.order.equipment,
       seller_info: ctx.session.order.seller_info,
+      agreement_date: ctx.session.order.agreement_date,
+      contact_number: ctx.session.order.contact_number,
       author_id: ctx.from.id
     });
     
@@ -141,6 +147,18 @@ const handleOrderText = async (ctx) => {
         price: sellerData.equipment.price,
         nds: sellerData.equipment.nds
       };
+      ctx.session.step = 'order_agreement_date';
+      ctx.reply('Введите дату соглашения (например, 20.03.2024):', backKeyboard);
+      break;
+
+    case 'order_agreement_date':
+      ctx.session.order.agreement_date = text;
+      ctx.session.step = 'order_contact_number';
+      ctx.reply('Введите номер контакта:', backKeyboard);
+      break;
+
+    case 'order_contact_number':
+      ctx.session.order.contact_number = text;
       ctx.session.step = 'order_seller_info';
       ctx.reply('Введите информацию о продавце:', backKeyboard);
       break;
@@ -158,6 +176,8 @@ const handleOrderText = async (ctx) => {
           contacts: ctx.session.order.contacts,
           equipment: ctx.session.order.equipment,
           seller_info: ctx.session.order.seller_info,
+          agreement_date: ctx.session.order.agreement_date,
+          contact_number: ctx.session.order.contact_number,
           author_id: ctx.from.id
         });
         

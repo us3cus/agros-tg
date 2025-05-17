@@ -15,6 +15,8 @@ const orderSchema = new mongoose.Schema({
     director: String,
     data: String
   },
+  agreement_date: String,
+  contact_number: String,
   created_at: { type: Date, default: Date.now },
   author_id: Number,
   status: { type: String, default: 'pending' }

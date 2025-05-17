@@ -29,7 +29,7 @@ const generateDocx = async (orderData) => {
       equipment_price: orderData.equipment.price.toLocaleString('ru-RU'),
       equipment_nds: orderData.equipment.nds.toLocaleString('ru-RU'),
       seller_company: sellerData.seller.seller_company,
-      seller_name: sellerData.seller.seller_name,
+      seller_name: sellerData.seller.director_name,
       seller_director: sellerData.seller.director_name,
       seller_data: sellerData.seller.seller_data,
       seller_phone: sellerData.seller.phone_number,
@@ -88,38 +88,12 @@ const handleAutoFill = async (ctx) => {
       director: sellerData.seller.director_name,
       data: sellerData.seller.seller_data
     },
-    agreement_date: new Date().toLocaleDateString('ru-RU'),
-    contact_number: `№${Date.now().toString().slice(-8)}`
+    agreement_date: new Date().toLocaleDateString('ru-RU')
   };
   
-  try {
-    const order = new Order({
-      company_name: ctx.session.order.company_name,
-      contacts: ctx.session.order.contacts,
-      equipment: ctx.session.order.equipment,
-      seller_info: ctx.session.order.seller_info,
-      agreement_date: ctx.session.order.agreement_date,
-      contact_number: ctx.session.order.contact_number,
-      author_id: ctx.from.id
-    });
-    
-    const savedOrder = await order.save();
-    
-    // Генерируем документ
-    const docxPath = await generateDocx(savedOrder);
-    
-    // Отправляем документ пользователю
-    await ctx.replyWithDocument({
-      source: docxPath,
-      filename: `agreement_${savedOrder.order_id}.docx`
-    });
-    
-    ctx.reply('Заказ успешно создан!', mainKeyboard);
-    ctx.session = null;
-  } catch (error) {
-    console.error('Ошибка при сохранении заказа:', error);
-    ctx.reply('Произошла ошибка при сохранении заказа. Пожалуйста, попробуйте еще раз.', mainKeyboard);
-  }
+  // Запрашиваем номер контакта
+  ctx.session.step = 'order_contact_number';
+  ctx.reply('Введите номер контакта:', backKeyboard);
 };
 
 // Обработчик для ввода текста при создании заказа
@@ -159,8 +133,42 @@ const handleOrderText = async (ctx) => {
 
     case 'order_contact_number':
       ctx.session.order.contact_number = text;
-      ctx.session.step = 'order_seller_info';
-      ctx.reply('Введите информацию о продавце:', backKeyboard);
+      
+      // Если это автозаполнение, сразу сохраняем заказ
+      if (ctx.session.order.seller_info) {
+        try {
+          const order = new Order({
+            company_name: ctx.session.order.company_name,
+            contacts: ctx.session.order.contacts,
+            equipment: ctx.session.order.equipment,
+            seller_info: ctx.session.order.seller_info,
+            agreement_date: ctx.session.order.agreement_date,
+            contact_number: ctx.session.order.contact_number,
+            author_id: ctx.from.id
+          });
+          
+          const savedOrder = await order.save();
+          
+          // Генерируем документ
+          const docxPath = await generateDocx(savedOrder);
+          
+          // Отправляем документ пользователю
+          await ctx.replyWithDocument({
+            source: docxPath,
+            filename: `agreement_${savedOrder.order_id}.docx`
+          });
+          
+          ctx.reply('Заказ успешно создан!', mainKeyboard);
+          ctx.session = null;
+        } catch (error) {
+          console.error('Ошибка при сохранении заказа:', error);
+          ctx.reply('Произошла ошибка при сохранении заказа. Пожалуйста, попробуйте еще раз.', mainKeyboard);
+        }
+      } else {
+        // Если это ручное заполнение, запрашиваем информацию о продавце
+        ctx.session.step = 'order_seller_info';
+        ctx.reply('Введите информацию о продавце:', backKeyboard);
+      }
       break;
       
     case 'order_seller_info':

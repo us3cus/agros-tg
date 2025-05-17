@@ -4,7 +4,7 @@
     "description": "Telegram-бот для учёта удобрения полей и менеджмента продаж",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js"
+        "start": "nodemon index.js"
     },
     "author": "Твоё Имя",
     "license": "MIT",
@@ -14,6 +14,7 @@
         "dotenv": "^16.5.0",
         "fs-extra": "^11.3.0",
         "mongoose": "^8.14.0",
+        "nodemon": "^3.1.10",
         "number-to-words-ru": "^2.4.1",
         "pizzip": "^3.2.0",
         "telegraf": "^4.12.2",

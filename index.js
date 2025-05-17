@@ -36,7 +36,7 @@ const checkAccess = async (ctx, next) => {
 };
 
 // Импортируем обработчики
-const { handleStart, handleBack, mainKeyboard } = require('./handlers/mainMenu');
+const { handleStart, handleBack, mainKeyboard, backKeyboard } = require('./handlers/mainMenu');
 const { handleCreateForm, handleNewFormCommand, handleFormText, handlePhotoUpload, handleSetDate3Days } = require('./handlers/formFilling');
 const { handleViewForms, handleViewForm, handleDeleteForm, handleCompleteTask, handleConfirmDelete } = require('./handlers/formViewing');
 const { handleWeather, handleLocation } = require('./handlers/weatherHandler');
@@ -44,10 +44,7 @@ const { handleNewOrderCommand, handleOrderText, handleAutoFill } = require('./ha
 const { handleViewOrders, handleViewOrder, handleDeleteOrder, handleConfirmDeleteOrder } = require('./handlers/orderViewing');
 
 // Подключаемся к MongoDB Atlas
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('Error connecting to MongoDB Atlas:', err));
 

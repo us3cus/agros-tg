@@ -36,7 +36,9 @@ const generateDocx = async (orderData) => {
       seller_address: sellerData.seller.address,
       date: new Date().toLocaleDateString('ru-RU'),
       agreement_date: orderData.agreement_date || new Date().toLocaleDateString('ru-RU'),
-      contact_number: orderData.contact_number || `№${orderData.order_id.slice(0, 8)}`
+      contact_number: orderData.contact_number || `№${orderData.order_id.slice(0, 8)}`,
+      director: sellerData.seller.director_name,
+      contract_number: orderData.contact_number || `№${orderData.order_id.slice(0, 8)}`
     };
 
     // Заполняем шаблон

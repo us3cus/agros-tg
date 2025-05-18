@@ -40,6 +40,8 @@ const { handleStart, handleBack, mainKeyboard } = require('./handlers/mainMenu')
 const { handleCreateForm, handleNewFormCommand, handleFormText, handlePhotoUpload, handleSetDate3Days } = require('./handlers/formFilling');
 const { handleViewForms, handleViewForm, handleDeleteForm, handleCompleteTask, handleConfirmDelete } = require('./handlers/formViewing');
 const { handleWeather, handleLocation } = require('./handlers/weatherHandler');
+const { handleNewOrderCommand, handleOrderText, handleAutoFill } = require('./handlers/orderHandler');
+const { handleViewOrders, handleViewOrder, handleDeleteOrder, handleConfirmDeleteOrder } = require('./handlers/orderViewing');
 
 // Подключаемся к MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI, {
@@ -60,20 +62,40 @@ bot.use(session({
 // Применяем middleware проверки доступа
 bot.use(checkAccess);
 
+// Обработчик для всех текстовых сообщений
+const handleAllText = (ctx, next) => {
+  // Если текущий шаг начинается с 'order_', вызываем обработчик заказов
+  if (ctx.session?.step?.startsWith('order_')) {
+    return handleOrderText(ctx);
+  }
+  // В противном случае продолжаем обработку стандартным обработчиком
+  return handleFormText(ctx);
+};
+
 // Регистрируем обработчики
 bot.start(handleStart);
 bot.action('create_form', handleCreateForm);
 bot.action('view_forms', handleViewForms);
+bot.action('view_orders', handleViewOrders);
 bot.action(/^view_form_(.+)$/, handleViewForm);
+bot.action(/^view_order_(.+)$/, handleViewOrder);
 bot.action(/^delete_form_(.+)$/, handleDeleteForm);
+bot.action(/^delete_order_(.+)$/, handleDeleteOrder);
 bot.action(/^confirm_delete_(.+)$/, handleConfirmDelete);
+bot.action(/^confirm_delete_order_(.+)$/, handleConfirmDeleteOrder);
 bot.action('set_date_3_days', handleSetDate3Days);
-bot.action(/^complete_task_(.+)$/, handleCompleteTask);
+bot.action('complete_task', handleCompleteTask);
 bot.action('back_to_main', handleBack);
 bot.action('weather', handleWeather);
+bot.action('auto_fill', handleAutoFill);
+bot.action('manual_fill', (ctx) => {
+  ctx.session.step = 'order_company_name';
+  ctx.reply('Введите название компании:', backKeyboard);
+});
 bot.on('location', handleLocation);
 bot.command('newform', handleNewFormCommand);
-bot.on('text', handleFormText);
+bot.command('neworder', handleNewOrderCommand);
+bot.on('text', handleAllText);
 bot.on('photo', handlePhotoUpload);
 
 // Запускаем бота

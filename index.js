@@ -40,7 +40,7 @@ const { handleStart, handleBack, mainKeyboard, backKeyboard } = require('./handl
 const { handleCreateForm, handleNewFormCommand, handleFormText, handlePhotoUpload, handleSetDate3Days } = require('./handlers/formFilling');
 const { handleViewForms, handleViewForm, handleDeleteForm, handleCompleteTask, handleConfirmDelete } = require('./handlers/formViewing');
 const { handleWeather, handleLocation } = require('./handlers/weatherHandler');
-const { handleNewOrderCommand, handleOrderText, handleAutoFill } = require('./handlers/orderHandler');
+const { handleNewOrderCommand, handleOrderText, handleAutoFill, handleDroneSelection, handleSpecificDroneSelection } = require('./handlers/orderHandler');
 const { handleViewOrders, handleViewOrder, handleDeleteOrder, handleConfirmDeleteOrder } = require('./handlers/orderViewing');
 
 // Подключаемся к MongoDB Atlas
@@ -89,9 +89,10 @@ bot.action('manual_fill', (ctx) => {
   ctx.session.step = 'order_company_name';
   ctx.reply('Введите название компании:', backKeyboard);
 });
+bot.action(/^select_drone_(.+)$/, handleSpecificDroneSelection);
 bot.on('location', handleLocation);
 bot.command('newform', handleNewFormCommand);
-bot.command('neworder', handleNewOrderCommand);
+bot.action('neworder', handleNewOrderCommand);
 bot.on('text', handleAllText);
 bot.on('photo', handlePhotoUpload);
 

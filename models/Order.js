@@ -8,7 +8,10 @@ const orderSchema = new mongoose.Schema({
   equipment: {
     name: String,
     price: Number,
-    nds: Number
+    nds: Number,
+    pieces: Number,
+    price_total: Number,
+    nds_total: Number
   },
   seller_info: {
     name: String,
